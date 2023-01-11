@@ -46,8 +46,6 @@ columns_to_drop = [
     'ticket_id',
     'entrance_nm',
     'station_nm',
-
-
 ]
 
 df.drop(columns_to_drop, axis=1, inplace=True)
@@ -65,7 +63,6 @@ columns_to_drop = [
     'entrance_id',
     'station_id',
     'line_id'
-
 ]
 
 ohe = OneHotEncoder(sparse=False)
@@ -85,7 +82,7 @@ df = df.drop(['pass_dttm'], axis=1)
 
 
 
-##########################ФОРМИРОВАНИЕ ML-модели
+##########################ФОРМИРОВАНИЕ ML-модели целевые переменные
 
 
 y_reg = df['time_to_under']
@@ -96,22 +93,26 @@ from sklearn.model_selection import train_test_split
 ###ЛИНЕЙНАЯ РЕГРЕССИЯ ДЛЯ ПРЕДСКАЗАНИЯ time_to_under
 from sklearn.linear_model import LinearRegression
 X_train, X_test, y_reg_train, y_reg_test = train_test_split(X, y_reg,
-                                                    test_size=0.2,
+                                                    test_size=0.33,
                                                     random_state=True)
 
 
 reg = LinearRegression().fit(X_train, y_reg_train)
 y_reg_pred = reg.predict(X_test)
 
-###КЛАССИФИКАЦИЯ С ПОМОЩЬЮ НАИВНОГО БАЙЕСОВСКОГО МЕТОДА (ГАУССИАН)
-from sklearn.naive_bayes import GaussianNB
+###КЛАССИФИКАЦИЯ С ПОМОЩЬЮ РАНДОМ ФОРЕСТ
+from sklearn.ensemble import RandomForestClassifier
 X_train, X_test, y_class_train, y_class_test = train_test_split(X, y_class,
-                                                    test_size=0.2,
+                                                    test_size=0.33,
                                                     random_state=True)
 
-cl = GaussianNB()
-cl.fit(X_train, y_class_train)
-y_class_pred = cl.predict(X_test)
+# Создаём модель леса из 10 деревьев
+mrandfor = RandomForestClassifier(n_estimators=10)
+
+# Обучаем на тренировочных данных
+mrandfor.fit(X_train, y_class_train)
+# Предсказания
+y_class_pred = mrandfor.predict(X_test)
 
 
 ########ИТОГОВАЯ МЕТРИКА:
